@@ -146,7 +146,8 @@ export default function AtividadeForm(props) {
             </Modal.Title>
           </Modal.Header>
           <Modal.Body>
-            <Form.Group controlId="titulo">
+            <div className="row">
+            <Form.Group controlId="titulo" className="col-md-6">
               <Form.Label>Título</Form.Label>
               <Form.Control
                 type="text"
@@ -158,7 +159,7 @@ export default function AtividadeForm(props) {
                 }
               />
             </Form.Group>
-            <Form.Group controlId="prioridade">
+            <Form.Group controlId="prioridade" className="col-md-6">
               <Form.Label>Prioridade</Form.Label>
               <Form.Select
                 name="prioridade"
@@ -173,6 +174,7 @@ export default function AtividadeForm(props) {
                 <option value="3">Alta</option>
               </Form.Select>
             </Form.Group>
+            </div>
             <Form.Group controlId="descricao">
               <Form.Label>Descrição</Form.Label>
               <Form.Control
