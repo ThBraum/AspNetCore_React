@@ -2,6 +2,7 @@ import {
   faFrown,
   faMeh,
   faPenToSquare,
+  faQuestionCircle,
   faSmile,
   faTrashAlt,
 } from "@fortawesome/free-regular-svg-icons";
@@ -12,24 +13,24 @@ import { Badge, Button, Card } from "react-bootstrap";
 export default function Atividade(props) {
   function prioridadeStyle(param, icon) {
     switch (param) {
-      case "1":
+      case 1:
         return icon ? faSmile : "success";
-      case "2":
+      case 2:
         return icon ? faMeh : "warning";
-      case "3":
+      case 3:
         return icon ? faFrown : "danger";
       default:
-        return null;
+        return icon ? faQuestionCircle : null;
     }
   }
 
   function prioridadeLabel(param) {
     switch (param) {
-      case "1":
+      case 1:
         return "Baixa";
-      case "2":
+      case 2:
         return "Normal";
-      case "3":
+      case 3:
         return "Alta";
       default:
         return "Selecione";
@@ -52,6 +53,7 @@ export default function Atividade(props) {
             Prioridade:
             <span className="ms-1 text-black">
               <FontAwesomeIcon
+                // @ts-ignore
                 icon={prioridadeStyle(props.response.prioridade, true)}
                 className="me-1"
               />

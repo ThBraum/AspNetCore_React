@@ -2,13 +2,10 @@
   "ExpandedNodes": [
     "",
     "\\back",
-    "\\back\\src",
-    "\\back\\src\\ProAtividade.API",
-    "\\back\\src\\ProAtividade.API\\Controllers",
-    "\\back\\src\\ProAtividade.API\\Repository",
-    "\\front",
-    "\\front\\pro-atividade-app"
+    "\\back\\ProAtividade.API",
+    "\\back\\ProAtividade.API\\Controllers",
+    "\\front"
   ],
-  "SelectedNode": "\\back\\src\\ProAtividade.API\\Repository\\DataContext.cs",
+  "SelectedNode": "\\back\\ProAtividade.API\\Controllers\\AtividadeController.cs",
   "PreviewInSolutionExplorer": false
 }

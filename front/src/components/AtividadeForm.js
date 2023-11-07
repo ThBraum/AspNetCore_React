@@ -3,6 +3,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import React, { useEffect, useState } from "react";
 import { Button, Form, Modal } from "react-bootstrap";
 import { toast } from "react-toastify";
+import api from "../api/atividade";
 import AtividadeList from "./AtividadeList";
 
 const initialState = [
@@ -10,21 +11,21 @@ const initialState = [
     id: 1,
     titulo: "Atividade 1",
     descricao: "Descrição atividade 1",
-    prioridade: "1",
+    prioridade: 1,
   },
   {
     id: 2,
     titulo: "Atividade 2",
     descricao: "Descrição atividade 2",
-    prioridade: "2",
+    prioridade: 2,
   },
 ];
 
-let atividadeInicial = {
+const atividadeInicial = {
   id: 0,
   titulo: "",
   descricao: "",
-  prioridade: "Selecione",
+  prioridade: 0,
 };
 
 export default function AtividadeForm(props) {
@@ -33,96 +34,140 @@ export default function AtividadeForm(props) {
   const [adicionarModo, setAdicionarModo] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [confirmacaoExclusao, setConfirmacaoExclusao] = useState(false);
-  const [atividadeExclusao, setAtividadeExclusao] = useState(null); // Novo estado
+  const [atividadeExclusao, setAtividadeExclusao] = useState(null);
 
   useEffect(() => {
-    const atividadesStorage = localStorage.getItem("atividades");
-    if (atividadesStorage) {
-      setAtividades(JSON.parse(atividadesStorage));
-    } else {
-      setAtividades(initialState);
-    }
+    const getAtividades = async () => {
+      const todasAtividades = await pegarAtividade();
+      if (todasAtividades) setAtividades(todasAtividades);
+    };
+    getAtividades();
   }, []);
 
-  function getNextId(atividades) {
-    const ids = atividades.map((atividade) => atividade.id);
-    const maxId = Math.max(0, ...ids);
-    return maxId + 1;
-  }
-
-  function handleEdit(atividade) {
+  const handleEdit = (atividade) => {
     setAtividade(atividade);
     setAdicionarModo(false);
     setShowModal(true);
   }
 
-  function handleCancelar() {
+  const handleAdicionar = () => {
+    setAdicionarModo(true);
+    setAtividade(atividadeInicial);
+    setShowModal(true);
+  }
+
+  const handleCancelar = () => {
     setAdicionarModo(true);
     setAtividade(atividadeInicial);
     setShowModal(false);
   }
 
-  function handleSubmit(event) {
-    event.preventDefault();
-    const titulo = event.target.titulo.value;
-    const descricao = event.target.descricao.value;
-    const prioridade = event.target.prioridade.value;
+  const handleDelete = (id) => {
+    setConfirmacaoExclusao(true);
+    setAtividadeExclusao(id);
+  }
 
-    if (!titulo || !descricao || prioridade === "Selecione") {
+  const confirmarExclusao = () => {
+    if (atividadeExclusao !== null) {
+      excluirAtividade(atividadeExclusao);
+      setConfirmacaoExclusao(false);
+      setAtividadeExclusao(null);
+    }
+  }
+
+  const cancelarExclusao = () => {
+    setConfirmacaoExclusao(false);
+    setAtividadeExclusao(null);
+  }
+
+  const pegarAtividade = async () => {
+    try {
+      const response = await api.get("/atividade");
+      if (response.status === 200) {
+        return response.data;
+      }
+    } catch (error) {
+      console.error("Erro ao listar atividades!", error);
+      toast.error("Erro ao listar atividades!", {
+        autoClose: 3000,
+      });
+    }
+  };
+
+  const adicionarAtividade = async (atividade) => {
+    if (!atividade.titulo || !atividade.descricao || atividade.prioridade === 0) {
       toast.error("Preencha todos os campos corretamente!", {
         autoClose: 3000,
       });
       return;
     }
-
-    let novaAtividade = { ...atividade };
-
-    if (atividade.id === 0) {
-      novaAtividade.id = getNextId(atividades);
-      setAtividades([...atividades, novaAtividade]);
-      toast.success("Atividade adicionada com sucesso!", {
-        autoClose: 3000,
-      });
-    } else {
-      const atividadesAtualizadas = atividades.map((a) =>
-        a.id === atividade.id ? novaAtividade : a
-      );
-      setAtividades(atividadesAtualizadas);
-      toast.success("Atividade atualizada com sucesso!", {
+    try {
+      const response = await api.post("/atividade", atividade);
+      if (response.status === 201) {
+        const novaAtividade = response.data;
+        setAtividades([...atividades, novaAtividade]);
+        setAtividade(atividadeInicial);
+        setShowModal(false);
+        toast.success("Atividade adicionada com sucesso!", {
+          autoClose: 3000,
+        });
+      }
+    } catch (error) {
+      console.error("Erro ao adicionar atividade!", error);
+      toast.error("Erro ao adicionar atividade!", {
         autoClose: 3000,
       });
     }
+  };
 
-    setAtividade(atividadeInicial);
-    setShowModal(false);
-    event.target.reset();
-    localStorage.setItem("atividades", JSON.stringify(atividades));
-  }
+  const editarAtividade = async (atividade) => {
+    if (!atividade.titulo || !atividade.descricao || atividade.prioridade === 0) {
+      toast.error("Preencha todos os campos corretamente!", {
+        autoClose: 3000,
+      });
+      return;
+    }
+    try {
+      const response = await api.put(`/atividade/${atividade.id}`, atividade);
+      if (response.status === 200) {
+        const atividadesAtualizadas = atividades.map((a) =>
+          a.id === atividade.id ? atividade : a
+        );
+        setAtividades(atividadesAtualizadas);
+        setAdicionarModo(true);
+        setAtividade(atividadeInicial);
+        setShowModal(false);
+        toast.success("Atividade atualizada com sucesso!", {
+          autoClose: 3000,
+        });
+      }
+    } catch (error) {
+      console.error("Erro ao atualizar atividade!", error);
+      toast.error("Erro ao atualizar atividade!", {
+        autoClose: 3000,
+      });
+    }
+  };
 
-  function handleDelete(id) {
-    setConfirmacaoExclusao(true);
-    setAtividadeExclusao(id);
-  }
-
-  function confirmarExclusao() {
-    const novasAtividades = atividades.filter((atividade) => {
-      return atividade.id !== atividadeExclusao;
-    });
-
-    setAtividades(novasAtividades);
-    toast.success("Atividade removida com sucesso!", {
-      autoClose: 3000,
-    });
-    localStorage.setItem("atividades", JSON.stringify(novasAtividades));
-
-    setConfirmacaoExclusao(false);
-    setAtividadeExclusao(null);
-  }
-
-  function cancelarExclusao() {
-    setConfirmacaoExclusao(false);
-    setAtividadeExclusao(null);
-  }
+  const excluirAtividade = async (atividadeId) => {
+    try {
+      const response = await api.delete(`/atividade/${atividadeId}`);
+      if (response.status === 204) {
+        const novasAtividades = atividades.filter(
+          (atividade) => atividade.id !== atividadeId
+        );
+        setAtividades(novasAtividades);
+        toast.success("Atividade removida com sucesso!", {
+          autoClose: 3000,
+        });
+      }
+    } catch (error) {
+      console.error("Erro ao excluir atividade!", error);
+      toast.error("Erro ao excluir a atividade!", {
+        autoClose: 3000,
+      });
+    }
+  };
 
   return (
     <>
@@ -131,7 +176,7 @@ export default function AtividadeForm(props) {
         <Button
           variant="outline-secondary"
           size="lg"
-          onClick={() => setShowModal(true)}
+          onClick={() => handleAdicionar()}
         >
           <FontAwesomeIcon icon={faSquarePlus} />
         </Button>
@@ -139,7 +184,16 @@ export default function AtividadeForm(props) {
       <hr />
 
       <Modal show={showModal} onHide={() => setShowModal(false)}>
-        <Form onSubmit={handleSubmit}>
+        <Form
+          onSubmit={(e) => {
+            e.preventDefault();
+            if (adicionarModo) {
+              adicionarAtividade(atividade);
+            } else {
+              editarAtividade(atividade);
+            }
+          }}
+        >
           <Modal.Header closeButton>
             <Modal.Title>
               {adicionarModo ? "Adicionar Atividade" : "Editar Atividade"}
@@ -147,33 +201,36 @@ export default function AtividadeForm(props) {
           </Modal.Header>
           <Modal.Body>
             <div className="row">
-            <Form.Group controlId="titulo" className="col-md-6">
-              <Form.Label>Título</Form.Label>
-              <Form.Control
-                type="text"
-                name="titulo"
-                placeholder="Digite o título da atividade"
-                value={atividade.titulo}
-                onChange={(e) =>
-                  setAtividade({ ...atividade, titulo: e.target.value })
-                }
-              />
-            </Form.Group>
-            <Form.Group controlId="prioridade" className="col-md-6">
-              <Form.Label>Prioridade</Form.Label>
-              <Form.Select
-                name="prioridade"
-                value={atividade.prioridade}
-                onChange={(e) =>
-                  setAtividade({ ...atividade, prioridade: e.target.value })
-                }
-              >
-                <option value="Selecione">Selecione...</option>
-                <option value="1">Baixa</option>
-                <option value="2">Normal</option>
-                <option value="3">Alta</option>
-              </Form.Select>
-            </Form.Group>
+              <Form.Group controlId="titulo" className="col-md-6">
+                <Form.Label>Título</Form.Label>
+                <Form.Control
+                  type="text"
+                  name="titulo"
+                  placeholder="Digite o título da atividade"
+                  value={atividade.titulo}
+                  onChange={(e) =>
+                    setAtividade({ ...atividade, titulo: e.target.value })
+                  }
+                />
+              </Form.Group>
+              <Form.Group controlId="prioridade" className="col-md-6">
+                <Form.Label>Prioridade</Form.Label>
+                <Form.Select
+                  name="prioridade"
+                  value={atividade.prioridade}
+                  onChange={(e) =>
+                    setAtividade({
+                      ...atividade,
+                      prioridade: parseInt(e.target.value),
+                    })
+                  }
+                >
+                  <option value={0}>Selecione...</option>
+                  <option value={1}>Baixa</option>
+                  <option value={2}>Normal</option>
+                  <option value={3}>Alta</option>
+                </Form.Select>
+              </Form.Group>
             </div>
             <Form.Group controlId="descricao">
               <Form.Label>Descrição</Form.Label>
@@ -194,7 +251,7 @@ export default function AtividadeForm(props) {
               <Button variant="secondary" onClick={handleCancelar}>
                 Cancelar
               </Button>
-              <Button variant="primary" type="submit">
+              <Button variant="primary" type="submit" className="ms-2">
                 {adicionarModo ? "Adicionar" : "Atualizar"}
               </Button>
             </div>

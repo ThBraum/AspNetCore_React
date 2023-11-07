@@ -47,6 +47,7 @@ namespace ProAtividade.API
                 .AllowAnyHeader());
             });
             services.AddScoped<Services.AtividadeService>();
+            services.AddCors();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -64,6 +65,8 @@ namespace ProAtividade.API
             app.UseRouting();
 
             app.UseAuthorization();
+
+            app.UseCors(option => option.AllowAnyHeader().AllowAnyMethod().AllowAnyOrigin());
 
             app.UseEndpoints(endpoints =>
             {

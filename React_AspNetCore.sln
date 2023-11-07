@@ -7,7 +7,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "back", "back", "{A8FEAE23-6
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{67EA2489-530C-4CFC-A754-45562193120D}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ProAtividade.API", "back\src\ProAtividade.API\ProAtividade.API.csproj", "{C8F0E1C0-72B4-4DFA-94E3-3241771B8CB5}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ProAtividade.API", "back\ProAtividade.API\ProAtividade.API.csproj", "{C8F0E1C0-72B4-4DFA-94E3-3241771B8CB5}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
