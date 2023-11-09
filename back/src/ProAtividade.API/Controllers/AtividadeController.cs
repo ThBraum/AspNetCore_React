@@ -70,13 +70,7 @@ namespace ProAtividade.API.Controllers
         {
             try
             {
-                // var novaAtividade = await _atividadeService.AdicionarAtividade(atividade);
-                // Log.Information($"novaAtividade: {novaAtividade}");
-                // Log.Information($"await _atividadeService.PegarAtividadePorIdAsync(novaAtividade.Id: {await _atividadeService.PegarAtividadePorIdAsync(novaAtividade.Id)}");
-                // return Created($"/api/atividade/{novaAtividade.Id}", novaAtividade);
                 var novaAtividade = await _atividadeService.AdicionarAtividade(atividade);
-                //Log.Information($"Atividade {atividade.Titulo} adicionada com sucesso");
-                Log.Information($"{await _atividadeService.PegarAtividadePorIdAsync(atividade.Id)}");
                 if (await _atividadeService.PegarAtividadePorIdAsync(atividade.Id) != null)
                 {
                     var location = new Uri($"{Request.Scheme}://{Request.Host.ToUriComponent()}/api/atividade/{novaAtividade.Id}");
