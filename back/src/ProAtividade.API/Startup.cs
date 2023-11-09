@@ -11,8 +11,12 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
-using ProAtividade.API.Repository;
 using Microsoft.EntityFrameworkCore;
+using ProAtividade.Data.Context;
+using ProAtividade.Domain.Interfaces.Repositories;
+using ProAtividade.Data.Repositories;
+using ProAtividade.Domain.Interfaces.Services;
+using ProAtividade.Domain.Services;
 
 namespace ProAtividade.API
 {
@@ -34,7 +38,9 @@ namespace ProAtividade.API
             {
                 options.UseSqlite(Configuration.GetConnectionString("DefaultConnection"));
             });
-
+            services.AddScoped<IAtividadeRepo, AtividadeRepo>(); //Se IAtividadeRepo for necessário, será passado AtividadeRepo
+            services.AddScoped<IAtividadeService, AtividadeService>();
+            services.AddScoped<IGeralRepo, GeralRepo>();
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "ProAtividade.API", Version = "v1" });
@@ -46,7 +52,6 @@ namespace ProAtividade.API
                 .AllowAnyMethod()
                 .AllowAnyHeader());
             });
-            services.AddScoped<Services.AtividadeService>();
             services.AddCors();
         }
 
